@@ -197,8 +197,8 @@ RBTree<T, EqualTo, Less>::RBTree(RBTree &&other) {
 }
 
 template <class T, typename EqualTo, typename Less>
-RBTree<T, EqualTo, Less> &
-RBTree<T, EqualTo, Less>::operator=(RBTree<T, EqualTo, Less> &&other) {
+auto RBTree<T, EqualTo, Less>::operator=(RBTree<T, EqualTo, Less> &&other)
+    -> RBTree & {
     move(std::move(other));
     return *this;
 }
@@ -213,8 +213,7 @@ void RBTree<T, EqualTo, Less>::move(RBTree &&other) {
 }
 
 template <class T, typename EqualTo, typename Less>
-typename RBTree<T, EqualTo, Less>::value_ptr
-RBTree<T, EqualTo, Less>::find(T const &value) const {
+auto RBTree<T, EqualTo, Less>::find(T const &value) const -> value_ptr {
     try {
         node_ptr node = findInSubtree(root, value);
         return node->value;
@@ -230,8 +229,7 @@ void RBTree<T, EqualTo, Less>::add(T const &value) {
 }
 
 template <class T, typename EqualTo, typename Less>
-typename RBTree<T, EqualTo, Less>::value_ptr
-RBTree<T, EqualTo, Less>::remove(T const &value) {
+auto RBTree<T, EqualTo, Less>::remove(T const &value) -> value_ptr {
     RemovalMethodImplementation impl(this);
     return impl.run(value);
 }
@@ -279,8 +277,8 @@ void RBTree<T, EqualTo, Less>::printTree(std::ostream &os) const {
 }
 
 template <class T, typename EqualTo, typename Less>
-typename RBTree<T, EqualTo, Less>::node_ptr
-RBTree<T, EqualTo, Less>::findInSubtree(node_ptr root, T const &value) {
+auto RBTree<T, EqualTo, Less>::findInSubtree(node_ptr root, T const &value)
+    -> node_ptr {
     node_ptr result = nullptr;
     if (!root) {
         throw NoSuchElementInSubtree("Error: no such element in subtree");
@@ -306,8 +304,7 @@ bool RBTree<T, EqualTo, Less>::subtreesEqual(node_ptr r1, node_ptr r2) {
 }
 
 template <class T, typename EqualTo, typename Less>
-typename RBTree<T, EqualTo, Less>::node_ptr
-RBTree<T, EqualTo, Less>::leftRotate(node_ptr node) {
+auto RBTree<T, EqualTo, Less>::leftRotate(node_ptr node) -> node_ptr {
     auto parent = node->parent.lock();
 
     // Set names
@@ -342,8 +339,7 @@ RBTree<T, EqualTo, Less>::leftRotate(node_ptr node) {
 }
 
 template <class T, typename EqualTo, typename Less>
-typename RBTree<T, EqualTo, Less>::node_ptr
-RBTree<T, EqualTo, Less>::rightRotate(node_ptr node) {
+auto RBTree<T, EqualTo, Less>::rightRotate(node_ptr node) -> node_ptr {
     auto parent = node->parent.lock();
 
     // Set names
@@ -396,8 +392,7 @@ void RBTree<T, EqualTo, Less>::saveToBinarySubtree(std::ostream &os,
 }
 
 template <class T, typename EqualTo, typename Less>
-RBTree<T, EqualTo, Less>
-RBTree<T, EqualTo, Less>::readFromBinary(std::istream &is) {
+auto RBTree<T, EqualTo, Less>::readFromBinary(std::istream &is) -> RBTree {
     RBTree<T, EqualTo, Less> tree;
     is.read(reinterpret_cast<char *>(&tree._size), sizeof(tree._size));
     tree.root = readSubtreeFromBinary(is);
@@ -405,8 +400,8 @@ RBTree<T, EqualTo, Less>::readFromBinary(std::istream &is) {
 }
 
 template <class T, typename EqualTo, typename Less>
-typename RBTree<T, EqualTo, Less>::node_ptr
-RBTree<T, EqualTo, Less>::readSubtreeFromBinary(std::istream &is) {
+auto RBTree<T, EqualTo, Less>::readSubtreeFromBinary(std::istream &is)
+    -> node_ptr {
     bool exists;
     is.read(reinterpret_cast<char *>(&exists), sizeof(exists));
     if (!exists) {
@@ -486,8 +481,7 @@ void RBTree<T, EqualTo, Less>::Node::serialize(std::ostream &os) const {
 }
 
 template <class T, typename EqualTo, typename Less>
-typename RBTree<T, EqualTo, Less>::node_ptr
-RBTree<T, EqualTo, Less>::Node::deserialize(std::istream &is) {
+auto RBTree<T, EqualTo, Less>::Node::deserialize(std::istream &is) -> node_ptr {
     char color;
     is.read(reinterpret_cast<char *>(&color), sizeof(color));
     Color node_color = static_cast<Color>(color);
@@ -516,9 +510,8 @@ void RBTree<T, EqualTo, Less>::AdditionMethodImplementation::run(
 }
 
 template <class T, typename EqualTo, typename Less>
-typename RBTree<T, EqualTo, Less>::node_ptr
-RBTree<T, EqualTo, Less>::AdditionMethodImplementation::findLeafParentInSubtree(
-    node_ptr root, T const &value) {
+auto RBTree<T, EqualTo, Less>::AdditionMethodImplementation::
+    findLeafParentInSubtree(node_ptr root, T const &value) -> node_ptr {
     node_ptr result = nullptr;
     if (!root) {
         throw TreeEmpty("Error: empty tree");
@@ -541,9 +534,8 @@ RBTree<T, EqualTo, Less>::AdditionMethodImplementation::findLeafParentInSubtree(
 }
 
 template <class T, typename EqualTo, typename Less>
-typename RBTree<T, EqualTo, Less>::node_ptr
-RBTree<T, EqualTo, Less>::AdditionMethodImplementation::addToLeafOfSubtree(
-    node_ptr root, T const &value) {
+auto RBTree<T, EqualTo, Less>::AdditionMethodImplementation::addToLeafOfSubtree(
+    node_ptr root, T const &value) -> node_ptr {
     try {
         node_ptr node = findLeafParentInSubtree(root, value);
         return addNodeToLeaf(node, value);
@@ -604,8 +596,8 @@ bool RBTree<T, EqualTo, Less>::AdditionMethodImplementation::
 }
 
 template <class T, typename EqualTo, typename Less>
-typename RBTree<T, EqualTo, Less>::node_ptr RBTree<T, EqualTo, Less>::
-    AdditionMethodImplementation::leftChildParentCaseBalance(node_ptr node) {
+auto RBTree<T, EqualTo, Less>::AdditionMethodImplementation::
+    leftChildParentCaseBalance(node_ptr node) -> node_ptr {
     if (rightChildNodeCase(node)) {
         node = node->parent.lock();
         node = tree->leftRotate(node)->left;
@@ -615,8 +607,8 @@ typename RBTree<T, EqualTo, Less>::node_ptr RBTree<T, EqualTo, Less>::
 }
 
 template <class T, typename EqualTo, typename Less>
-typename RBTree<T, EqualTo, Less>::node_ptr RBTree<T, EqualTo, Less>::
-    AdditionMethodImplementation::rightChildParentCaseBalance(node_ptr node) {
+auto RBTree<T, EqualTo, Less>::AdditionMethodImplementation::
+    rightChildParentCaseBalance(node_ptr node) -> node_ptr {
     if (leftChildNodeCase(node)) {
         node = node->parent.lock();
         node = tree->rightRotate(node)->right;
@@ -644,8 +636,8 @@ bool RBTree<T, EqualTo, Less>::AdditionMethodImplementation::redUncleCase(
 }
 
 template <class T, typename EqualTo, typename Less>
-typename RBTree<T, EqualTo, Less>::node_ptr RBTree<T, EqualTo, Less>::
-    AdditionMethodImplementation::recolorParentAndGrandfather(node_ptr node) {
+auto RBTree<T, EqualTo, Less>::AdditionMethodImplementation::
+    recolorParentAndGrandfather(node_ptr node) -> node_ptr {
     auto parent = node->parent.lock();
     auto grandfather = parent->parent.lock();
     parent->color = BLACK;
@@ -654,9 +646,8 @@ typename RBTree<T, EqualTo, Less>::node_ptr RBTree<T, EqualTo, Less>::
 }
 
 template <class T, typename EqualTo, typename Less>
-typename RBTree<T, EqualTo, Less>::node_ptr
-RBTree<T, EqualTo, Less>::AdditionMethodImplementation::
-    recolorParentAndUncleAndGrandfather(node_ptr node) {
+auto RBTree<T, EqualTo, Less>::AdditionMethodImplementation::
+    recolorParentAndUncleAndGrandfather(node_ptr node) -> node_ptr {
     auto parent = node->parent.lock();
     auto grandfather = parent->parent.lock();
     node_ptr uncle;
@@ -691,9 +682,9 @@ void RBTree<T, EqualTo,
 }
 
 template <class T, typename EqualTo, typename Less>
-typename RBTree<T, EqualTo, Less>::node_ptr
-RBTree<T, EqualTo, Less>::AdditionMethodImplementation::addNodeToLeaf(
-    node_ptr node, T const &value) {
+// typename RBTree<T, EqualTo, Less>::node_ptr
+auto RBTree<T, EqualTo, Less>::AdditionMethodImplementation::addNodeToLeaf(
+    node_ptr node, T const &value) -> node_ptr {
     node_ptr leaf;
     if (EqualTo::cmp(*node->value, value)) {
         throw TreeHasGivenElement(
@@ -708,9 +699,8 @@ RBTree<T, EqualTo, Less>::AdditionMethodImplementation::addNodeToLeaf(
 }
 
 template <class T, typename EqualTo, typename Less>
-typename RBTree<T, EqualTo, Less>::node_ptr
-RBTree<T, EqualTo, Less>::AdditionMethodImplementation::addNodeToLeftLeaf(
-    node_ptr node, T const &value) {
+auto RBTree<T, EqualTo, Less>::AdditionMethodImplementation::addNodeToLeftLeaf(
+    node_ptr node, T const &value) -> node_ptr {
     if (!node->left) {
         return node->left = makeNode(Color::RED, value);
     } else {
@@ -719,9 +709,8 @@ RBTree<T, EqualTo, Less>::AdditionMethodImplementation::addNodeToLeftLeaf(
 }
 
 template <class T, typename EqualTo, typename Less>
-typename RBTree<T, EqualTo, Less>::node_ptr
-RBTree<T, EqualTo, Less>::AdditionMethodImplementation::addNodeToRightLeaf(
-    node_ptr node, T const &value) {
+auto RBTree<T, EqualTo, Less>::AdditionMethodImplementation::addNodeToRightLeaf(
+    node_ptr node, T const &value) -> node_ptr {
     if (!node->right) {
         return node->right = makeNode(Color::RED, value);
     } else {
@@ -730,9 +719,8 @@ RBTree<T, EqualTo, Less>::AdditionMethodImplementation::addNodeToRightLeaf(
 }
 
 template <class T, typename EqualTo, typename Less>
-typename RBTree<T, EqualTo, Less>::node_ptr
-RBTree<T, EqualTo, Less>::AdditionMethodImplementation::makeNode(
-    Color color, T const &value) {
+auto RBTree<T, EqualTo, Less>::AdditionMethodImplementation::makeNode(
+    Color color, T const &value) -> node_ptr {
     auto v_ptr = std::make_shared<T>(value);
     return std::make_shared<Node>(color, v_ptr);
 }
@@ -746,8 +734,8 @@ RBTree<T, EqualTo, Less>::AdditionMethodImplementation::makeNode(
 #define RB_TREE_HPP
 
 template <class T, typename EqualTo, typename Less>
-typename RBTree<T, EqualTo, Less>::value_ptr
-RBTree<T, EqualTo, Less>::RemovalMethodImplementation::run(T const &value) {
+auto RBTree<T, EqualTo, Less>::RemovalMethodImplementation::run(T const &value)
+    -> value_ptr {
     if (tree->empty()) {
         throw TreeEmpty("Error: can not remove node from empty RBTree!");
     }
@@ -772,9 +760,8 @@ RBTree<T, EqualTo, Less>::RemovalMethodImplementation::run(T const &value) {
 }
 
 template <class T, typename EqualTo, typename Less>
-typename RBTree<T, EqualTo, Less>::node_ptr
-RBTree<T, EqualTo, Less>::RemovalMethodImplementation::removeNode(
-    node_ptr node) {
+auto RBTree<T, EqualTo, Less>::RemovalMethodImplementation::removeNode(
+    node_ptr node) -> node_ptr {
     if (childlessNodeCase(node)) {
         node = removeChildlessNode(node);
     } else if (nodeWithOneChildCase(node)) {
@@ -797,9 +784,8 @@ bool RBTree<T, EqualTo, Less>::RemovalMethodImplementation::
 }
 
 template <class T, typename EqualTo, typename Less>
-typename RBTree<T, EqualTo, Less>::node_ptr
-RBTree<T, EqualTo, Less>::RemovalMethodImplementation::removeChildlessNode(
-    node_ptr node) {
+auto RBTree<T, EqualTo, Less>::RemovalMethodImplementation::removeChildlessNode(
+    node_ptr node) -> node_ptr {
     auto parent = node->parent.lock();
     if (!parent) {
         tree->root = nullptr;
@@ -812,9 +798,8 @@ RBTree<T, EqualTo, Less>::RemovalMethodImplementation::removeChildlessNode(
 }
 
 template <class T, typename EqualTo, typename Less>
-typename RBTree<T, EqualTo, Less>::node_ptr
-RBTree<T, EqualTo, Less>::RemovalMethodImplementation::removeNodeWithOneChild(
-    node_ptr node) {
+auto RBTree<T, EqualTo, Less>::RemovalMethodImplementation::
+    removeNodeWithOneChild(node_ptr node) -> node_ptr {
     auto parent = node->parent.lock();
     auto child = (node->left ? node->left : node->right);
     if (!parent) {
@@ -832,8 +817,8 @@ RBTree<T, EqualTo, Less>::RemovalMethodImplementation::removeNodeWithOneChild(
 }
 
 template <class T, typename EqualTo, typename Less>
-typename RBTree<T, EqualTo, Less>::node_ptr RBTree<T, EqualTo, Less>::
-    RemovalMethodImplementation::removeNodeWithTwoChildren(node_ptr node) {
+auto RBTree<T, EqualTo, Less>::RemovalMethodImplementation::
+    removeNodeWithTwoChildren(node_ptr node) -> node_ptr {
     auto next = findLeastLargestNodeFromNodeWithTwoChildren(node);
     node->value = next->value;
     if (next->right) {
@@ -844,9 +829,8 @@ typename RBTree<T, EqualTo, Less>::node_ptr RBTree<T, EqualTo, Less>::
 }
 
 template <class T, typename EqualTo, typename Less>
-typename RBTree<T, EqualTo, Less>::node_ptr
-RBTree<T, EqualTo, Less>::RemovalMethodImplementation::
-    findLeastLargestNodeFromNodeWithTwoChildren(node_ptr node) {
+auto RBTree<T, EqualTo, Less>::RemovalMethodImplementation::
+    findLeastLargestNodeFromNodeWithTwoChildren(node_ptr node) -> node_ptr {
     auto next = node->right;
     while (next->left) {
         next = next->left;
