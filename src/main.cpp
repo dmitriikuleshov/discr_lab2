@@ -18,14 +18,14 @@ struct KeyValuePair {
     }
 
     static KeyValuePair deserialize(std::istream &is) {
-        KeyValuePair v;
+        KeyValuePair kv;
         uint64_t len;
         is.read(reinterpret_cast<char *>(&len), sizeof(len));
         std::vector<char> buffer(len);
         is.read(buffer.data(), len);
-        v.key.assign(buffer.data(), len);
-        is.read(reinterpret_cast<char *>(&v.value), sizeof(v.value));
-        return v;
+        kv.key.assign(buffer.data(), len);
+        is.read(reinterpret_cast<char *>(&kv.value), sizeof(kv.value));
+        return kv;
     }
 };
 
@@ -45,14 +45,14 @@ void lower(std::string &s) {
     }
 }
 
-std::istream &operator>>(std::istream &iss, KeyValuePair &v) {
-    iss >> v.key >> v.value;
-    lower(v.key);
+std::istream &operator>>(std::istream &iss, KeyValuePair &kv) {
+    iss >> kv.key >> kv.value;
+    lower(kv.key);
     return iss;
 }
 
-std::ostream &operator<<(std::ostream &os, KeyValuePair &v) {
-    return os << v.key << " " << v.value;
+std::ostream &operator<<(std::ostream &os, KeyValuePair &kv) {
+    return os << kv.key << " " << kv.value;
 }
 
 int main() {
@@ -61,10 +61,10 @@ int main() {
     std::string word;
     while (std::cin >> word) {
         if (word == "+") {
-            KeyValuePair v;
-            std::cin >> v;
+            KeyValuePair kv;
+            std::cin >> kv;
             try {
-                tree.add(v);
+                tree.add(kv);
                 std::cout << "OK\n";
             } catch (...) {
                 std::cout << "Exist\n";
@@ -72,9 +72,9 @@ int main() {
         } else if (word == "-") {
             std::cin >> word;
             lower(word);
-            KeyValuePair v{word, 0};
+            KeyValuePair kv{word, 0};
             try {
-                tree.remove(v);
+                tree.remove(kv);
                 std::cout << "OK\n";
             } catch (...) {
                 std::cout << "NoSuchWord\n";
@@ -108,11 +108,16 @@ int main() {
         } else if (word == "print") {
             tree.printTree(std::cout);
             std::cout << "\n";
+        } else if (word == "clear") {
+            tree.clear();
+        } else if (word == "exit") {
+            tree.clear();
+            _Exit(0);
         } else {
             try {
                 lower(word);
-                auto v = tree.find(KeyValuePair{word, 0});
-                std::cout << "OK: " << v->value << "\n";
+                auto kv = tree.find(KeyValuePair{word, 0});
+                std::cout << "OK: " << kv->value << "\n";
             } catch (...) {
                 std::cout << "NoSuchWord\n";
             }

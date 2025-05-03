@@ -47,6 +47,7 @@ class RBTree {
     value_ptr remove(T const &value);
     bool empty() const;
     uint64_t size() const;
+    void clear();
 
     bool operator==(RBTree<T, EqualTo, Less> const &other) const;
 
@@ -993,6 +994,20 @@ RBTree<T, EqualTo, Less>::Node::deserialize(std::istream &is) {
     T val = T::deserialize(is);
     auto value_ptr = std::make_shared<T>(val);
     return std::make_shared<Node>(node_color, value_ptr);
+}
+
+template <class T, typename EqualTo, typename Less>
+void RBTree<T, EqualTo, Less>::clear() {
+    std::function<void(node_ptr &)> clearSubtree = [&](node_ptr &node) {
+        if (!node)
+            return;
+        clearSubtree(node->left);
+        clearSubtree(node->right);
+        node.reset();
+    };
+    clearSubtree(root);
+    root.reset();
+    _size = 0;
 }
 
 #endif
