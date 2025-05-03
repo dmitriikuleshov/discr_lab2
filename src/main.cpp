@@ -13,7 +13,8 @@ struct KeyValuePair {
     void serialize(std::ostream &os) const {
         uint64_t len = key.size();
         os.write(reinterpret_cast<const char *>(&len), sizeof(len));
-        os.write(key.data(), len);
+        // Явное приведение к std::streamsize
+        os.write(key.data(), static_cast<std::streamsize>(len));
         os.write(reinterpret_cast<const char *>(&value), sizeof(value));
     }
 
@@ -22,7 +23,8 @@ struct KeyValuePair {
         uint64_t len;
         is.read(reinterpret_cast<char *>(&len), sizeof(len));
         std::vector<char> buffer(len);
-        is.read(buffer.data(), len);
+        // Явное приведение к std::streamsize
+        is.read(buffer.data(), static_cast<std::streamsize>(len));
         kv.key.assign(buffer.data(), len);
         is.read(reinterpret_cast<char *>(&kv.value), sizeof(kv.value));
         return kv;
@@ -110,9 +112,10 @@ int main() {
             std::cout << "\n";
         } else if (word == "clear") {
             tree.clear();
+            std::cout << "OK\n";
         } else if (word == "exit") {
             tree.clear();
-            _Exit(0);
+            exit(0);
         } else {
             try {
                 lower(word);

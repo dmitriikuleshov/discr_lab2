@@ -7,13 +7,13 @@
 #endif
 
 #include "rb_tree_exceptions.hpp"
-
 #include <functional>
 #include <iomanip>
 #include <iostream>
 #include <memory>
 
 namespace cust {
+
 template <class T> struct EqualTo {
     static constexpr bool cmp(T const &a, T const &b) { return a == b; }
 };
@@ -930,6 +930,8 @@ bool RBTree<T, EqualTo, Less>::RemovalMethodImplementation::redLeftChildCase(
     return (node->left && node->left->color == RED);
 }
 
+////////////////////////////////////////////////////////////////////////////////
+
 template <class T, typename EqualTo, typename Less>
 void RBTree<T, EqualTo, Less>::saveToBinary(std::ostream &os) const {
     uint64_t size = _size;
@@ -998,14 +1000,6 @@ RBTree<T, EqualTo, Less>::Node::deserialize(std::istream &is) {
 
 template <class T, typename EqualTo, typename Less>
 void RBTree<T, EqualTo, Less>::clear() {
-    std::function<void(node_ptr &)> clearSubtree = [&](node_ptr &node) {
-        if (!node)
-            return;
-        clearSubtree(node->left);
-        clearSubtree(node->right);
-        node.reset();
-    };
-    clearSubtree(root);
     root.reset();
     _size = 0;
 }
