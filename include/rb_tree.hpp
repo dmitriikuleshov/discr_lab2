@@ -12,7 +12,7 @@
 #include <iostream>
 #include <memory>
 
-namespace cust {
+namespace rb_tree {
 
 // Template parameters for comparison (Equal to)
 template <class T> struct EqualTo {
@@ -949,6 +949,6 @@ void RBTree<T, EqualTo, Less>::clear() {
 
 #endif
 
-}; // namespace cust
+}; // namespace rb_tree
 
 #endif

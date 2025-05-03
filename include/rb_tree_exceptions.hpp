@@ -3,7 +3,7 @@
 
 #include <stdexcept>
 
-namespace cust {
+namespace rb_tree {
 class NoSuchElement : public std::runtime_error {
   public:
     NoSuchElement(std::string const &message) : std::runtime_error(message) {}
@@ -47,6 +47,6 @@ class NoLeafParentElementInTree : public std::runtime_error {
     NoLeafParentElementInTree(std::string const &message)
         : std::runtime_error(message) {}
 };
-}; // namespace cust
+}; // namespace rb_tree
 
 #endif
