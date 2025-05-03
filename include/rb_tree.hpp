@@ -14,17 +14,8 @@
 
 namespace rb_tree {
 
-// Template parameters for comparison (Equal to)
-template <class T> struct EqualTo {
-    static constexpr bool cmp(T const &a, T const &b) { return a == b; }
-};
-
-// Template parameters for comparison (Less than)
-template <class T> struct Less {
-    static constexpr bool cmp(T const &a, T const &b) { return a < b; }
-};
-
-template <class T, typename EqualTo = EqualTo<T>, typename Less = Less<T>>
+template <class T, typename EqualTo = std::equal_to<T>,
+          typename Less = std::less<T>>
 class RBTree {
   protected:
     // Node information
@@ -36,9 +27,6 @@ class RBTree {
     using wnode_ptr = std::weak_ptr<Node>;
 
   public:
-    // Comparator from previous version ¯\_(ツ)_/¯
-    // using comparator = std::function<bool(T const &, T const &)>; //
-
     using value_ptr = std::shared_ptr<T>;
 
     RBTree() = default;
@@ -282,9 +270,9 @@ auto RBTree<T, EqualTo, Less>::findInSubtree(node_ptr root, T const &value)
     node_ptr result = nullptr;
     if (!root) {
         throw NoSuchElementInSubtree("Error: no such element in subtree");
-    } else if (EqualTo::cmp(*root->value, value)) {
+    } else if (EqualTo()(*root->value, value)) {
         result = root;
-    } else if (Less::cmp(*root->value, value)) {
+    } else if (Less()(*root->value, value)) {
         result = findInSubtree(root->right, value);
     } else {
         result = findInSubtree(root->left, value);
@@ -430,20 +418,20 @@ template <class T, typename EqualTo, typename Less>
 bool RBTree<T, EqualTo, Less>::Node::leftIsTheOne(node_ptr node,
                                                   T const &value) {
     return (node != nullptr) && (node->left != nullptr) &&
-           EqualTo::cmp(*node->left->value, value);
+           EqualTo()(*node->left->value, value);
 }
 
 template <class T, typename EqualTo, typename Less>
 bool RBTree<T, EqualTo, Less>::Node::rightIsTheOne(node_ptr node,
                                                    T const &value) {
     return (node != nullptr) && (node->right != nullptr) &&
-           EqualTo::cmp(*node->right->value == value);
+           EqualTo()(*node->right->value, value);
 }
 
 template <class T, typename EqualTo, typename Less>
 bool RBTree<T, EqualTo, Less>::Node::operator==(Node const &other) const {
     return (this->color == other.color) &&
-           EqualTo::cmp(*this->value, *other.value);
+           EqualTo()(*this->value, *other.value);
 }
 
 template <class T, typename EqualTo, typename Less>
@@ -515,9 +503,9 @@ auto RBTree<T, EqualTo, Less>::AdditionMethodImplementation::
     node_ptr result = nullptr;
     if (!root) {
         throw TreeEmpty("Error: empty tree");
-    } else if (EqualTo::cmp(*root->value, value)) {
+    } else if (EqualTo()(*root->value, value)) {
         throw NoLeafParentElementInTree("Error: no leaf parent in subtree");
-    } else if (Less::cmp(*root->value, value)) {
+    } else if (Less()(*root->value, value)) {
         if (!root->right) {
             result = root;
         } else {
@@ -682,14 +670,13 @@ void RBTree<T, EqualTo,
 }
 
 template <class T, typename EqualTo, typename Less>
-// typename RBTree<T, EqualTo, Less>::node_ptr
 auto RBTree<T, EqualTo, Less>::AdditionMethodImplementation::addNodeToLeaf(
     node_ptr node, T const &value) -> node_ptr {
     node_ptr leaf;
-    if (EqualTo::cmp(*node->value, value)) {
+    if (EqualTo()(*node->value, value)) {
         throw TreeHasGivenElement(
             "Error: can not add repeating element to leaf!");
-    } else if (Less::cmp(*node->value, value)) {
+    } else if (Less()(*node->value, value)) {
         leaf = addNodeToRightLeaf(node, value);
     } else {
         leaf = addNodeToLeftLeaf(node, value);
@@ -747,8 +734,7 @@ auto RBTree<T, EqualTo, Less>::RemovalMethodImplementation::run(T const &value)
         if (!parent) {
             node->color = BLACK;
         } else if (node->color == BLACK) {
-            auto side =
-                (Less::cmp(*node->value, *parent->value) ? LEFT : RIGHT);
+            auto side = (Less()(*node->value, *parent->value) ? LEFT : RIGHT);
             fixBlackHeight(parent, side);
             tree->root->color = BLACK;
         }
@@ -944,8 +930,6 @@ void RBTree<T, EqualTo, Less>::clear() {
     root.reset();
     _size = 0;
 }
-
-////////////////////////////////////////////////////////////////////////////////
 
 #endif
 
