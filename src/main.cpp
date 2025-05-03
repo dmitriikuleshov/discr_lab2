@@ -1,18 +1,41 @@
 #include <rb_tree.hpp>
 
+#include <filesystem>
 #include <fstream>
 #include <iostream>
 
 using namespace cust;
 
-struct var {
-    std::string first;
-    uint64_t second;
+struct KeyValuePair {
+    std::string key;
+    uint64_t value;
+
+    void serialize(std::ostream &os) const {
+        uint64_t len = key.size();
+        os.write(reinterpret_cast<const char *>(&len), sizeof(len));
+        os.write(key.data(), len);
+        os.write(reinterpret_cast<const char *>(&value), sizeof(value));
+    }
+
+    static KeyValuePair deserialize(std::istream &is) {
+        KeyValuePair v;
+        uint64_t len;
+        is.read(reinterpret_cast<char *>(&len), sizeof(len));
+        std::vector<char> buffer(len);
+        is.read(buffer.data(), len);
+        v.key.assign(buffer.data(), len);
+        is.read(reinterpret_cast<char *>(&v.value), sizeof(v.value));
+        return v;
+    }
 };
 
-bool operator==(var const &a, var const &b) { return a.first == b.first; }
+bool operator==(KeyValuePair const &a, KeyValuePair const &b) {
+    return a.key == b.key;
+}
 
-bool operator<(var const &a, var const &b) { return a.first < b.first; }
+bool operator<(KeyValuePair const &a, KeyValuePair const &b) {
+    return a.key < b.key;
+}
 
 void lower(std::string &s) {
     for (auto &c : s) {
@@ -22,23 +45,23 @@ void lower(std::string &s) {
     }
 }
 
-std::istream &operator>>(std::istream &iss, var &v) {
-    iss >> v.first >> v.second;
-    lower(v.first);
+std::istream &operator>>(std::istream &iss, KeyValuePair &v) {
+    iss >> v.key >> v.value;
+    lower(v.key);
     return iss;
 }
 
-std::ostream &operator<<(std::ostream &os, var &v) {
-    return os << v.first << " " << v.second;
+std::ostream &operator<<(std::ostream &os, KeyValuePair &v) {
+    return os << v.key << " " << v.value;
 }
 
 int main() {
-    RBTree<var> tree;
+    RBTree<KeyValuePair> tree;
 
     std::string word;
     while (std::cin >> word) {
         if (word == "+") {
-            var v;
+            KeyValuePair v;
             std::cin >> v;
             try {
                 tree.add(v);
@@ -49,7 +72,7 @@ int main() {
         } else if (word == "-") {
             std::cin >> word;
             lower(word);
-            var v{word, 0};
+            KeyValuePair v{word, 0};
             try {
                 tree.remove(v);
                 std::cout << "OK\n";
@@ -57,28 +80,39 @@ int main() {
                 std::cout << "NoSuchWord\n";
             }
         } else if (word == "!") {
-            std::string filename;
-            std::cin >> word;
-            std::cin.get();
+            std::string cmd, filename;
+            std::cin >> cmd;
+            std::cin.get(); // Пропустить пробел
             std::getline(std::cin, filename);
-            if (word == "Save") {
-                std::ofstream off(filename, std::ios_base::trunc);
-                tree.saveInStream(off);
+            if (cmd == "Save") {
+                std::ofstream off(filename, std::ios::binary);
+                tree.saveToBinary(off);
                 off.close();
-            } else {
-                std::ifstream iff(filename);
-                tree = std::move(RBTree<var>::readFromStream(iff));
-                iff.close();
+                std::cout << "OK\n";
+            } else if (cmd == "Load") {
+                if (!std::filesystem::exists(filename)) {
+                    std::cout << "Error: File '" << filename
+                              << "' does not exist\n";
+                } else {
+                    std::ifstream iff(filename, std::ios::binary);
+                    if (iff) {
+                        tree = RBTree<KeyValuePair>::readFromBinary(iff);
+                        std::cout << "OK\n";
+                    } else {
+                        std::cout << "Error: Cannot open file\n";
+                    }
+                    iff.close();
+                }
             }
-            std::cout << "OK\n";
+
         } else if (word == "print") {
             tree.printTree(std::cout);
             std::cout << "\n";
         } else {
             try {
                 lower(word);
-                auto v = tree.find(var{word, 0});
-                std::cout << "OK: " << v->second << "\n";
+                auto v = tree.find(KeyValuePair{word, 0});
+                std::cout << "OK: " << v->value << "\n";
             } catch (...) {
                 std::cout << "NoSuchWord\n";
             }

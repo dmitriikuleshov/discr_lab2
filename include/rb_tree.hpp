@@ -53,6 +53,9 @@ class RBTree {
     static void saveInStream(std::ostream &os, node_ptr root);
     void saveInStream(std::ostream &os) const;
 
+    void saveToBinary(std::ostream &os) const;
+    static RBTree<T, EqualTo, Less> readFromBinary(std::istream &is);
+
     static RBTree<T, EqualTo, Less> readFromStream(std::istream &is);
 
     static void printTree(std::ostream &os, node_ptr root, int ident = 0);
@@ -64,6 +67,9 @@ class RBTree {
 
     static bool subtreesEqual(node_ptr r1, node_ptr r2);
     static node_ptr findInSubtree(node_ptr root, T const &value);
+
+    static void saveToBinarySubtree(std::ostream &os, node_ptr node);
+    static node_ptr readSubtreeFromBinary(std::istream &is);
 
     node_ptr rightRotate(node_ptr node);
     node_ptr leftRotate(node_ptr node);
@@ -93,6 +99,8 @@ class RBTree<T, EqualTo, Less>::Node {
   public:
     static bool leftIsTheOne(node_ptr node, T const &value);
     static bool rightIsTheOne(node_ptr node, T const &value);
+    void serialize(std::ostream &os) const;
+    static node_ptr deserialize(std::istream &is);
 
   public:
     node_ptr left;
@@ -919,6 +927,72 @@ template <class T, typename EqualTo, typename Less>
 bool RBTree<T, EqualTo, Less>::RemovalMethodImplementation::redLeftChildCase(
     node_ptr node) {
     return (node->left && node->left->color == RED);
+}
+
+template <class T, typename EqualTo, typename Less>
+void RBTree<T, EqualTo, Less>::saveToBinary(std::ostream &os) const {
+    uint64_t size = _size;
+    os.write(reinterpret_cast<const char *>(&size), sizeof(size));
+    saveToBinarySubtree(os, root);
+}
+
+template <class T, typename EqualTo, typename Less>
+void RBTree<T, EqualTo, Less>::saveToBinarySubtree(std::ostream &os,
+                                                   node_ptr node) {
+    bool exists = node != nullptr;
+    os.write(reinterpret_cast<const char *>(&exists), sizeof(exists));
+    if (exists) {
+        node->serialize(os);
+        saveToBinarySubtree(os, node->left);
+        saveToBinarySubtree(os, node->right);
+    }
+}
+
+template <class T, typename EqualTo, typename Less>
+RBTree<T, EqualTo, Less>
+RBTree<T, EqualTo, Less>::readFromBinary(std::istream &is) {
+    RBTree<T, EqualTo, Less> tree;
+    is.read(reinterpret_cast<char *>(&tree._size), sizeof(tree._size));
+    tree.root = readSubtreeFromBinary(is);
+    return tree;
+}
+
+template <class T, typename EqualTo, typename Less>
+typename RBTree<T, EqualTo, Less>::node_ptr
+RBTree<T, EqualTo, Less>::readSubtreeFromBinary(std::istream &is) {
+    bool exists;
+    is.read(reinterpret_cast<char *>(&exists), sizeof(exists));
+    if (!exists) {
+        return nullptr;
+    }
+    auto node = Node::deserialize(is);
+    node->left = readSubtreeFromBinary(is);
+    if (node->left) {
+        node->left->parent = node;
+    }
+    node->right = readSubtreeFromBinary(is);
+    if (node->right) {
+        node->right->parent = node;
+    }
+    return node;
+}
+
+template <class T, typename EqualTo, typename Less>
+void RBTree<T, EqualTo, Less>::Node::serialize(std::ostream &os) const {
+    char color = static_cast<char>(this->color);
+    os.write(&color, sizeof(color));
+    value->serialize(os);
+}
+
+template <class T, typename EqualTo, typename Less>
+typename RBTree<T, EqualTo, Less>::node_ptr
+RBTree<T, EqualTo, Less>::Node::deserialize(std::istream &is) {
+    char color;
+    is.read(reinterpret_cast<char *>(&color), sizeof(color));
+    Color node_color = static_cast<Color>(color);
+    T val = T::deserialize(is);
+    auto value_ptr = std::make_shared<T>(val);
+    return std::make_shared<Node>(node_color, value_ptr);
 }
 
 #endif
