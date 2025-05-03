@@ -1,3 +1,4 @@
 .vscode
 build
 dict
+gmon.out
