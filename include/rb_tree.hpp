@@ -14,6 +14,12 @@
 
 namespace rb_tree {
 
+template <typename T>
+concept Serializable = requires(T t, std::ostream &os, std::istream &is) {
+    { t.serialize(os) } -> std::same_as<void>;
+    { T::deserialize(is) } -> std::same_as<T>;
+};
+
 template <class T, typename EqualTo = std::equal_to<T>,
           typename Less = std::less<T>>
 class RBTree {
@@ -43,8 +49,10 @@ class RBTree {
 
     bool operator==(RBTree<T, EqualTo, Less> const &other) const;
 
-    void saveToBinary(std::ostream &os) const;
-    static RBTree<T, EqualTo, Less> readFromBinary(std::istream &is);
+    void saveToBinary(std::ostream &os) const
+        requires Serializable<T>;
+    static RBTree<T, EqualTo, Less> readFromBinary(std::istream &is)
+        requires Serializable<T>;
 
     static void printTree(std::ostream &os, node_ptr root, int ident = 0);
     void printTree(std::ostream &os) const;
@@ -361,7 +369,9 @@ auto RBTree<T, EqualTo, Less>::rightRotate(node_ptr node) -> node_ptr {
 }
 
 template <class T, typename EqualTo, typename Less>
-void RBTree<T, EqualTo, Less>::saveToBinary(std::ostream &os) const {
+void RBTree<T, EqualTo, Less>::saveToBinary(std::ostream &os) const
+    requires Serializable<T>
+{
     uint64_t size = _size;
     os.write(reinterpret_cast<const char *>(&size), sizeof(size));
     saveToBinarySubtree(os, root);
@@ -380,7 +390,9 @@ void RBTree<T, EqualTo, Less>::saveToBinarySubtree(std::ostream &os,
 }
 
 template <class T, typename EqualTo, typename Less>
-auto RBTree<T, EqualTo, Less>::readFromBinary(std::istream &is) -> RBTree {
+auto RBTree<T, EqualTo, Less>::readFromBinary(std::istream &is) -> RBTree
+    requires Serializable<T>
+{
     RBTree<T, EqualTo, Less> tree;
     is.read(reinterpret_cast<char *>(&tree._size), sizeof(tree._size));
     tree.root = readSubtreeFromBinary(is);
