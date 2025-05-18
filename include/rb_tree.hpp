@@ -457,23 +457,6 @@ std::ostream &RBTree<T, EqualTo, Less>::Node::print(std::ostream &os) const {
 }
 
 template <class T, typename EqualTo, typename Less>
-std::istream &RBTree<T, EqualTo, Less>::Node::read(std::istream &is) {
-    char _format_char;
-    is >> _format_char;
-    if (_format_char == 'N') {
-        throw std::runtime_error("Error: bad reading RBTree node!");
-    }
-    value = std::make_shared<T>();
-    is >> *value;
-    is >> _format_char;
-    char coloc_ch;
-    is >> coloc_ch;
-    color = (coloc_ch == '0' ? BLACK : RED);
-    is >> _format_char;
-    return is;
-}
-
-template <class T, typename EqualTo, typename Less>
 void RBTree<T, EqualTo, Less>::Node::serialize(std::ostream &os) const {
     char color = static_cast<char>(this->color);
     os.write(&color, sizeof(color));

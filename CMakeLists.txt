@@ -38,6 +38,7 @@ if(NOT CMAKE_CXX_EXTENSIONS)
 endif()
 
 
-include_directories(include)
+#include_directories(include)
 
-add_executable(main src/main.cpp)
+#add_executable(main src/main.cpp)
+add_executable(main1 src/main1.cpp)

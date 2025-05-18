@@ -1,0 +1,17 @@
+{
+	"files.associations": {
+		"atomic": "cpp",
+		"deque": "cpp",
+		"string": "cpp",
+		"unordered_map": "cpp",
+		"vector": "cpp",
+		"fstream": "cpp",
+		"limits": "cpp",
+		"sstream": "cpp",
+		"system_error": "cpp",
+		"string_view": "cpp",
+		"streambuf": "cpp",
+		"iosfwd": "cpp",
+		"profile": "cpp"
+	}
+}

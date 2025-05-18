@@ -1,0 +1,3 @@
+/home/dmitriikuleshov/discran/lab2/build/CMakeFiles/main1.dir
+/home/dmitriikuleshov/discran/lab2/build/CMakeFiles/edit_cache.dir
+/home/dmitriikuleshov/discran/lab2/build/CMakeFiles/rebuild_cache.dir
