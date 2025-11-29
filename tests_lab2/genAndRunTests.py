@@ -47,11 +47,6 @@ def prepareTestData(config: TestDataConfig):
         if 50 <= command < 70: # word
             s = f'{random_word}\n'
             output_file.write(s)
-        # if 80 <= command < 90: # save
-        #     output_file.write(f'! Save {config.tree_file_path}\n')
-        #     saved = True
-        # if 90 <= command < 100 and saved: # load
-        #     output_file.write(f'! Load {config.tree_file_path}\n')
 
     output_file.close()
 
