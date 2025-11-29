@@ -13,7 +13,6 @@ struct KeyValuePair {
     void serialize(std::ostream &os) const {
         uint64_t len = key.size();
         os.write(reinterpret_cast<const char *>(&len), sizeof(len));
-        // Явное приведение к std::streamsize
         os.write(key.data(), static_cast<std::streamsize>(len));
         os.write(reinterpret_cast<const char *>(&value), sizeof(value));
     }
@@ -84,7 +83,7 @@ int main() {
         } else if (word == "!") {
             std::string cmd, filename;
             std::cin >> cmd;
-            std::cin.get(); // Пропустить пробел
+            std::cin.get();
             std::getline(std::cin, filename);
             if (cmd == "Save") {
                 std::ofstream off(filename, std::ios::binary);
