@@ -1,1 +1,0 @@
-/usr/bin/c++  -std=c++20 -g -pg  -pg CMakeFiles/main1.dir/src/main1.cpp.o -o main1 
